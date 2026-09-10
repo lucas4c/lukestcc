@@ -1,0 +1,20 @@
+(venv) PS C:\Users\lucas\OneDrive\Área de Trabalho\PROTOTIPO> python .\cleanDataset.py
+
+====================================
+PROCESSING COMPLETE
+====================================
+Pages processed: 13316
+Pages kept:      3902
+Documents saved: 30950
+
+book            1023
+book_content    27048
+character       1321
+location        1065
+quest           493
+
+Output file: datasets/Skyrim_knowledge.jsonl
+====================================
+(venv) PS C:\Users\lucas\OneDrive\Área de Trabalho\PROTOTIPO> 
+
+
