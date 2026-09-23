@@ -17,4 +17,25 @@ Output file: datasets/Skyrim_knowledge.jsonl
 ====================================
 (venv) PS C:\Users\lucas\OneDrive\Área de Trabalho\PROTOTIPO> 
 
+testando 3 modelos 
 
+llama3.2:1b
+tinyllama
+llama3.2
+
+
+query no rag foi muito importante
+    # Query Transformation: Adicionamos o nome do NPC e localização para forçar 
+# o banco vetorial a buscar o assunto (Civil War) vinculado àquela entidade.
+rag_query = f"{npc_name} from {home_city}. {test['player_message']}"
+
+try:
+    retrieved_docs = retriever.invoke(rag_query)
+    rag_text = "\n\n".join([doc.page_content for doc in retrieved_docs])
+except Exception as e:
+    rag_text = "No relevant knowledge found."
+
+    Por que isso é ótimo para a sua monografia: Você pode incluir um subtópico na metodologia chamado 
+    "Otimização de Contexto Vetorial". Mostrar que você começou com uma query direta, diagnosticou a poluição semântica no prompt,
+     e implementou a Query Expansion (f"{npc_name} {player_message}") é ouro acadêmico. Isso prova que você não está apenas "chamando APIs",
+      mas arquitetando um fluxo de dados inteligente.

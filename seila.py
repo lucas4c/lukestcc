@@ -1,4 +1,4 @@
-from langchain_groq import ChatGroq
+from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 
 import json
@@ -8,8 +8,10 @@ import pandas as pd
 # MODEL
 # ==================================================
 
-model = ChatGroq(
-    model="meta-llama/llama-4-scout-17b-16e-instruct"
+# Utilize o nome exato do modelo baixado no Ollama
+model = ChatOllama(
+    model="tinyllama", # ou "llama3.2:1b" / "qwen2.5:0.5b"
+    temperature=0.0
 )
 
 # ==================================================
@@ -46,11 +48,10 @@ chain = prompt | model
 # ==================================================
 
 with open(
-    "datasets/dialogue_options.json",
+    "datasets/skyrim_benchmark_full.json",
     "r",
     encoding="utf-8"
 ) as f:
-
     dataset = json.load(f)
 
 # ==================================================
@@ -58,12 +59,10 @@ with open(
 # ==================================================
 
 results = []
-
 correct = 0
 total = 0
 
 for npc in dataset["characters"]:
-
     npc_name = npc["character"]
 
     print()
@@ -72,29 +71,20 @@ for npc in dataset["characters"]:
     print("===================================")
 
     for test in npc["dialogues"]:
-
         result = chain.invoke({
-
-            "player_message":
-                test["player_message"],
-
-            "option_a":
-                test["options"]["A"],
-
-            "option_b":
-                test["options"]["B"],
-
-            "option_c":
-                test["options"]["C"],
-
-            "option_d":
-                test["options"]["D"]
+            "player_message": test["player_message"],
+            "option_a": test["options"]["A"],
+            "option_b": test["options"]["B"],
+            "option_c": test["options"]["C"],
+            "option_d": test["options"]["D"]
         })
 
-        prediction = result.content.strip().upper()
+        # Modelos locais menores podem às vezes adicionar pontuação extra ou palavras.
+        # Pegar apenas o primeiro caractere válido ajuda a limpar a saída.
+        raw_prediction = result.content.strip().upper()
+        prediction = raw_prediction[0] if raw_prediction else ""
 
         expected = test["correct"]
-
         is_correct = prediction == expected
 
         if is_correct:
@@ -103,15 +93,10 @@ for npc in dataset["characters"]:
         total += 1
 
         results.append({
-
             "npc": npc_name,
-
             "step": test["step"],
-
             "expected": expected,
-
-            "predicted": prediction,
-
+            "predicted": raw_prediction, # Salva o output cru para você debugar se o modelo for verboso
             "correct": is_correct
         })
 
