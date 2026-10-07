@@ -33,7 +33,7 @@ def get_vram_usage():
 # ==================================================
 # CONFIGURAÇÃO DO MODELO
 # ==================================================
-MODEL_NAME = "llama3.2:1b"
+MODEL_NAME = "llama3.2:latest"
 
 # Cria um nome seguro para salvar o arquivo no Windows
 safe_model_name = re.sub(r'[\\/*?:"<>|]', "_", MODEL_NAME)
@@ -89,7 +89,7 @@ B) {option_b}
 C) {option_c}
 D) {option_d}
 
-Respond with ONLY one letter: A, B, C or D. Do not explain your reasoning.
+Read all four options carefully before answering. Which option (A, B, C, or D) is the most accurate response? Respond with ONLY a single letter. Do not explain.
 """
 
 prompt = ChatPromptTemplate.from_template(template)
@@ -98,7 +98,7 @@ chain = prompt | model
 # ==================================================
 # CARREGAR DATASET DE TESTE
 # ==================================================
-dataset_path = "datasets/skyrim_benchmark_full.json"
+dataset_path = "datasets/skyrim_benchmark_full_new.json"
 try:
     with open(dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)

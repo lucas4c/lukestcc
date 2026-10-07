@@ -22,7 +22,7 @@ except pynvml.NVMLError:
 # ==================================================
 # CONFIGURAÇÃO DO MODELO
 # ==================================================
-MODEL_NAME = "llama3.2:1b"
+MODEL_NAME = "llama3.2:latest"
 
 model = ChatOllama(
     model=MODEL_NAME,
@@ -55,7 +55,7 @@ chain = prompt | model
 # ==================================================
 # CARREGAR DATASET
 # ==================================================
-dataset_path = "datasets/skyrim_benchmark_full.json"
+dataset_path = "datasets/skyrim_benchmark_full_new.json"
 try:
     with open(dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
@@ -144,7 +144,7 @@ for npc in dataset["characters"]:
             "step": test["step"],
             "expected": expected,
             "predicted": prediction,
-            "raw_output": raw_prediction,
+            "raw_output": result,
             "correct": is_correct,
             # Métricas anexadas ao CSV
             "latency_sec": round(latency_seconds, 2),

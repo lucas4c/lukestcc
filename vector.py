@@ -39,7 +39,7 @@ def sanitize_wiki_text(text):
 # 2. CONFIGURAÇÃO BASE (Splitter e Embeddings)
 # ==================================================
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=600,
+    chunk_size=500,
     chunk_overlap=100,
     separators=["\n\n", "\n", ".", "?", "!", " ", ""]
 )
@@ -48,7 +48,7 @@ embeddings = OllamaEmbeddings(model="mxbai-embed-large")
 db_location = "./chroma_langchain_db"
 
 # Lê os dados brutos
-df = pd.read_json("datasets/Skyrim_knowledge.jsonl", lines=True)
+df = pd.read_json("datasets/Skyrim_knowledge_clean.jsonl", lines=True)
 
 # ==================================================
 # 3. GERAÇÃO DE DOCUMENTOS (Chunks limpos)

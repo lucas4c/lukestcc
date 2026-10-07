@@ -15,12 +15,35 @@ generator_model = ChatGroq(
     temperature=0.2 
 )
 
+# characters_to_process = [
+#     "Balgruuf the Greater", "Ulfric Stormcloak", "General Tullius", "Delphine",
+#     "Brynjolf", "Astrid", "Serana", "Isran", "Neloth", "Cicero",
+#     "Aela the Huntress", "Farkas", "Kodlak Whitemane", "Farengar Secret-Fire",
+#     "Elisif the Fair", "Maven Black-Briar", "Nazeem", "Paarthurnax",
+#     "Lydia", "Mercer Frey"
+# ]
+
 characters_to_process = [
-    "Balgruuf the Greater", "Ulfric Stormcloak", "General Tullius", "Delphine",
-    "Brynjolf", "Astrid", "Serana", "Isran", "Neloth", "Cicero",
-    "Aela the Huntress", "Farkas", "Kodlak Whitemane", "Farengar Secret-Fire",
-    "Elisif the Fair", "Maven Black-Briar", "Nazeem", "Paarthurnax",
-    "Lydia", "Mercer Frey"
+    "Balgruuf the Greater", # Árvores longas sobre a Guerra Civil e Dragões
+    "Ulfric Stormcloak",    # Ideologia, Guerra Civil, Greybeards
+    "General Tullius",      # Império, táticas de guerra
+    "Delphine",             # Blades, Thalmor, investigação longa
+    "Serana",               # A follower com a maior e mais complexa árvore de diálogo do jogo
+    "Isran",                # Dawnguard, vampiros
+    "Neloth",               # Telvanni, magia, DLC Dragonborn (muitos diálogos ramificados)
+    "Brynjolf",             # Thieves Guild, esquemas
+    "Astrid",               # Dark Brotherhood
+    "Paarthurnax",          # Filosofia draconiana, Way of the Voice
+    "Esbern",               # Blades, profecias, Alduin
+    "Galmar Stone-Fist",    # Segunda mão do Ulfric, testes de lealdade
+    "Legate Rikke",         # Segunda mão de Tullius
+    "Vex",                  # Thieves Guild (diálogos estruturados de missão)
+    "Delvin Mallory",       # Thieves Guild
+    "Karliah",              # Nightingale lore
+    "Gelebor",              # Snow Elf lore (longas exposições interativas)
+    "Frea",                 # Skaal lore
+    "Mirabelle Ervine",     # College of Winterhold
+    "Tolfdir"               # College of Winterhold
 ]
 
 def scrape_uesp_dialogue(character_name):
@@ -47,20 +70,49 @@ def scrape_uesp_dialogue(character_name):
 # PROMPT GERADOR (Corrigido com chaves duplas para LangChain)
 # ==================================================
 
-system_prompt = """
-You are an expert data curator for a Skyrim dialogue benchmark.
-Your task is to take raw text from the UESP Wiki about a specific character and generate a JSON array of 5 dialogue steps.
+# system_prompt = """
+# You are an expert data curator for a Skyrim dialogue benchmark.
+# Your task is to take raw text from the UESP Wiki about a specific character and generate a JSON array of 5 dialogue steps.
 
-CRITICAL RULES:
-1. The correct answer MUST be an exact quote or highly accurate paraphrase from the game lore provided in the text.
-2. The 'player_message' MUST make sense sequentially, creating a 5-step conversation.
-3. The FALSE options must follow these difficulty rules to trick baseline LLMs:
-   - Make one false option lore-accurate for the world, but wrong for this specific character.
-   - Make one false option convey the same information as the correct answer, but in a completely WRONG TONE for the character (e.g., polite instead of aggressive).
-   - Make one false option contradict something established in Step 1.
+# CRITICAL RULES:
+# 1. The correct answer MUST be an exact quote or highly accurate paraphrase from the game lore provided in the text.
+# 2. The 'player_message' MUST make sense sequentially, creating a 5-step conversation.
+# 3. The FALSE options must follow these difficulty rules to trick baseline LLMs:
+#    - Make one false option lore-accurate for the world, but wrong for this specific character.
+#    - Make one false option convey the same information as the correct answer, but in a completely WRONG TONE for the character (e.g., polite instead of aggressive).
+#    - Make one false option contradict something established in Step 1.
+
+# OUTPUT FORMAT MUST BE EXACTLY LIKE THIS (no markdown, just raw JSON).
+# Note: Always put the correct answer as option A in your JSON output. The python script will randomize the letters later.
+# [
+#   {{
+#     "step": 1,
+#     "context": [],
+#     "player_message": "...",
+#     "options": {{ "A": "[Correct Answer]", "B": "...", "C": "...", "D": "..." }},
+#     "correct": "A"
+#   }}
+# ]
+# """
+
+system_prompt = """
+You are an expert narrative designer and data curator for a Skyrim AI dialogue benchmark.
+Your task is to analyze the raw UESP Wiki text about a specific character and extract/construct a highly logical, SEQUENTIAL 5-step conversation between the Player and the NPC.
+
+CRITICAL RULES FOR NARRATIVE FLOW:
+1. The 5 steps MUST form a single, continuous, and logical conversation. Do not just pick random, disconnected quotes. 
+2. Look for dialogue trees in the text where the player asks a question and the NPC answers. If the text lists a series of questions the player can ask during a specific quest, use those sequentially.
+3. The 'player_message' must naturally lead into the correct NPC response.
+4. The correct answer (Option A) MUST be an exact quote or highly accurate paraphrase from the game lore provided in the text.
+
+CRITICAL RULES FOR FALSE OPTIONS:
+To rigorously test the AI benchmark, the FALSE options must follow these specific difficulty constraints:
+- Option B (Lore-Accurate but Wrong Character/Context): A statement that is true in Skyrim's lore, but this specific character would never say it in this context.
+- Option C (Correct Info, Wrong Tone): Conveys the same factual information as Option A, but in a completely WRONG TONE for the character (e.g., extremely polite if the character is aggressive, or modern/slang language).
+- Option D (Context Amnesia / Contradiction): An option that blatantly contradicts a fact established in Step 1 or Step 2 of this very conversation. (For Step 1, make it contradict the character's core alignment).
 
 OUTPUT FORMAT MUST BE EXACTLY LIKE THIS (no markdown, just raw JSON).
-Note: Always put the correct answer as option A in your JSON output. The python script will randomize the letters later.
+Note: Always put the correct answer as option A in your JSON output.
 [
   {{
     "step": 1,
@@ -151,5 +203,5 @@ for char in characters_to_process:
     except Exception as e:
         print(f"[{char}] Erro: {e}")
 
-with open("datasets/skyrim_benchmark_full.json", "w", encoding="utf-8") as f:
+with open("datasets/skyrim_benchmark_full_refined.json", "w", encoding="utf-8") as f:
     json.dump(final_dataset, f, indent=2, ensure_ascii=False)
